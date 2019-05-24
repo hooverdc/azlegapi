@@ -400,9 +400,7 @@ class AzLegApiClient:
 
         meta = response.attrib
 
-        committees = {
-            "legislature_id": meta["legislature"]
-        }
+        committees = {"legislature_id": meta["legislature"]}
 
         for committee_type in response:
 
@@ -417,29 +415,161 @@ class AzLegApiClient:
                     committee_attrib = committee.attrib
 
                     obj = {
-                    "type": committee_type_str,
-                    "body": committee_body_str,
-                    "committee_id": committee_attrib["Committee_ID"],
-                    "committee_name": committee_attrib["Committee_Name"],
-                    "committee_short_name": committee_attrib["Committee_Short_Name"],
-                    "sub_committee": committee_attrib["Sub_Committee"],
+                        "type": committee_type_str,
+                        "body": committee_body_str,
+                        "committee_id": committee_attrib["Committee_ID"],
+                        "committee_name": committee_attrib["Committee_Name"],
+                        "committee_short_name": committee_attrib[
+                            "Committee_Short_Name"
+                        ],
+                        "sub_committee": committee_attrib["Sub_Committee"],
                     }
 
-                    committees["committee"] = obj            
+                    committees["committee"] = obj
 
         return committees
 
-    def committee_by_leg_type(self):
-        pass
+    def committee_by_leg_type(self, legislature_id: int, committee_type: str) -> Dict:
 
-    def committees_by_leg_type_body(self):
-        pass
+        response = self.client.service.CommitteeByLegType(
+            legislature_id, committee_type
+        )
 
-    def committees_by_leg(self):
-        pass
+        meta = response.attrib
 
-    def committee_members(self):
-        pass
+        committees = {"legislature_id": meta["legislature"], "committees": []}
+
+        for type in response:
+
+            committee_type = type.attrib["Committee_Type"]
+
+            for body in type:
+
+                committee_body = body.attrib["Body"]
+
+                for committee in body:
+
+                    committee_attrib = committee.attrib
+
+                    current = {
+                        "type": committee_type,
+                        "body": committee_body,
+                        "committee_id": committee_attrib["Committee_ID"],
+                        "committee_name": committee_attrib["Committee_Name"],
+                        "committee_short_name": committee_attrib[
+                            "Committee_Short_Name"
+                        ],
+                        "sub_committee": committee_attrib["Sub_Committee"],
+                    }
+
+                    committees["committees"].append(current)
+
+        return committees
+
+    def committees_by_leg_type_body(self, legislature_id, body: str) -> Dict:
+
+        response = self.client.service.CommitteeByLegBody(
+            legislature_id, body
+        )
+
+        meta = response.attrib
+
+        committees = {"legislature_id": meta["legislature"], "committees": []}
+
+        for type in response:
+
+            committee_type = type.attrib["Committee_Type"]
+
+            for body in type:
+
+                committee_body = body.attrib["Body"]
+
+                for committee in body:
+
+                    committee_attrib = committee.attrib
+
+                    current = {
+                        "type": committee_type,
+                        "body": committee_body,
+                        "committee_id": committee_attrib["Committee_ID"],
+                        "committee_name": committee_attrib["Committee_Name"],
+                        "committee_short_name": committee_attrib[
+                            "Committee_Short_Name"
+                        ],
+                        "sub_committee": committee_attrib["Sub_Committee"],
+                    }
+
+                    committees["committees"].append(current)
+
+        return committees
+
+    def committees_by_leg(self, legislature_id: int) -> Dict:
+        
+        response = self.client.service.CommitteeByLegislature(legislature_id)
+
+        meta = response.attrib
+
+        committees = {"legislature_id": meta["legislature"], "committees": []}
+
+        for type in response:
+
+            committee_type = type.attrib["Committee_Type"]
+
+            for body in type:
+
+                committee_body = body.attrib["Body"]
+
+                for committee in body:
+
+                    committee_attrib = committee.attrib
+
+                    current = {
+                        "type": committee_type,
+                        "body": committee_body,
+                        "committee_id": committee_attrib["Committee_ID"],
+                        "committee_name": committee_attrib["Committee_Name"],
+                        "committee_short_name": committee_attrib[
+                            "Committee_Short_Name"
+                        ],
+                        "sub_committee": committee_attrib["Sub_Committee"],
+                    }
+
+                    committees["committees"].append(current)
+
+        return committees
+
+    def committee_members(self, session_id: int, committee_id: int) -> Dict:
+        
+        response = self.client.service.CommitteeMembers(session_id, committee_id)
+
+        current_body = response.find('BODY')
+        current_committee = current_body.find('COMMITTEE')
+
+        response_committee_id = current_committee.get('Committee_ID')
+
+        committee_members = {
+            "committee_id": response_committee_id,
+            "committee_type": current_committee.get("Committee_Type"),
+            "committee_name": current_committee.get("Committee_Name"),
+            "committee_members":[]
+        }
+
+        # Probably a better way of doing this
+
+        for body in response:
+            for committee in body:
+                for members in committee:
+                    for member in members:
+                        obj = {
+                            "member_order": member.get("Member_Order"),
+                            "member_id": member.get("Member_ID"),
+                            "member_name": member.get("Member_Name"),
+                            "member_position": member.get("Member_Position")
+                        }
+
+                        committee_members["committee_members"].append(obj)
+
+        return committee_members
 
     def documents_by_bill_num(self):
         pass
