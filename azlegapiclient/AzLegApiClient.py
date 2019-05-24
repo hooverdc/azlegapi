@@ -18,7 +18,7 @@ class AzLegApiClient:
     # def pretty_print_xml(self, node):
     #     print(etree.tostring(node, pretty_print=True))
 
-    def checkIsoDate(self, key: str, obj: object):
+    def iso_date(self, key: str, obj: object):
         return isodate.parse_datetime(obj[key]) if key in obj else None
 
     def ars(self):
@@ -138,23 +138,196 @@ class AzLegApiClient:
 
     # BillsUpdated
 
-    def updated_bills(self, session_id, start_date):
+    def updated_bills(self, session_id: int, start_date: str):
 
-        bills = self.client.service.BillsUpdated(session_id, start_date)
+        response = self.client.service.BillsUpdated(session_id, start_date)
+
+        meta = response.attrib
+
+        bills = {"session_id": meta["SessionID"], "bills": []}
+
+        for bill in response:
+
+            obj = {
+                "bill_number": bill.findtext("Bill_Number"),
+                "initial_title": bill.findtext("Initial_Title"),
+                "current_title": bill.findtext("Current_Title"),
+                "last_updated": isodate.parse_datetime(bill.findtext("Last_Updated")),
+            }
+
+            bills["bills"].append(obj)
 
         return bills
 
-    def calendars_by_body(self):
-        pass
+    def calendars_by_body(self, session_id: int, body: str) -> Dict:
 
-    def calendars_by_id(self):
-        pass
+        response = self.client.service.CalendarsByBody(session_id, body)
 
-    def calendars_by_committee_id(self):
-        pass
+        calendars = {"session_id": session_id, "body": body, "calendars": []}
+
+        for calendar in response:
+
+            current = calendar.attrib
+
+            calendar_obj = {
+                "calendar_id": current["Cal_ID"],
+                "body": current["Body"],
+                "type": current["Type"],
+                "calendar_date": current["Cal_Date"],
+                "number": current["Number"],
+                "committee_name": current["Committee_Name"],
+                "committee_id": current["Committee_ID"],
+                "calendar_name": current["Cal_Name"],
+                "calendar_Time": current["Cal_Time"],
+                "protest_date": current["Protest_Date"]
+                if "Protest_Date" in current
+                else None,
+                "url": current["URL"] if "URL" in current else None,
+                "bills": [],
+            }
+
+            for bill in calendar:
+
+                bill_attrib = bill.attrib
+
+                bill_obj = {
+                    "Bill_Number": bill_attrib["Bill_Number"],
+                    "Display_Order": bill_attrib["Display_Order"],
+                    "Reconsidered": bill_attrib["Reconsidered"],
+                }
+
+                calendar_obj["bills"].append(bill_obj)
+
+            calendars["calendars"].append(calendar_obj)
+
+        return calendars
+
+    def calendars_by_id(self, calendar_id):
+
+        response = self.client.service.CalendarsByCalendarID(calendar_id)
+
+        current = response.find("CALENDAR")
+        current_attrib = current.attrib
+
+        calendar = {
+            "calendar_id": current_attrib["Cal_ID"],
+            "body": current_attrib["Body"],
+            "type": current_attrib["Type"],
+            "calendar_date": current_attrib["Cal_Date"],
+            "number": current_attrib["Number"],
+            "committee_name": current_attrib["Committee_Name"],
+            "committee_id": current_attrib["Committee_ID"],
+            "calendar_name": current_attrib["Cal_Name"],
+            "calendar_time": current_attrib["Cal_Time"],
+            "protest_date": current_attrib["Protest_Date"],
+            "url": current_attrib["URL"] if "URL" in current_attrib else None,
+            "bills": [],
+        }
+
+        for bill in current:
+
+            bill_attrib = bill.attrib
+
+            bill_obj = {
+                "Bill_Number": bill_attrib["Bill_Number"],
+                "Display_Order": bill_attrib["Display_Order"],
+                "Reconsidered": bill_attrib["Reconsidered"],
+            }
+
+            calendar["bills"].append(bill_obj)
+
+        return calendar
+
+    def calendars_by_committee_id(self, session_id, committee_id):
+
+        response = self.client.service.CalendarsByCommittee(session_id, committee_id)
+
+        calendars = {
+            "session_id": session_id,
+            "committee_id": committee_id,
+            "calendars": [],
+        }
+
+        for calendar in response:
+
+            current = calendar.attrib
+
+            calendar_obj = {
+                "calendar_id": current["Cal_ID"],
+                "body": current["Body"],
+                "type": current["Type"],
+                "calendar_date": current["Cal_Date"],
+                "number": current["Number"],
+                "committee_name": current["Committee_Name"],
+                "committee_id": current["Committee_ID"],
+                "calendar_name": current["Cal_Name"],
+                "calendar_Time": current["Cal_Time"],
+                "protest_date": current["Protest_Date"],
+                "url": current["URL"] if "URL" in current else None,
+                "bills": [],
+            }
+
+            for bill in calendar:
+
+                bill_attrib = bill.attrib
+
+                bill_obj = {
+                    "Bill_Number": bill_attrib["Bill_Number"],
+                    "Display_Order": bill_attrib["Display_Order"],
+                    "Reconsidered": bill_attrib["Reconsidered"],
+                }
+
+                calendar_obj["bills"].append(bill_obj)
+
+            calendars["calendars"].append(calendar_obj)
+
+        return calendars
 
     def calendars_by_session_id(self, session_id, start_date=None):
-        pass
+
+        if start_date is not None:
+            response = self.client.service.CalendarsFromDate(session_id, start_date)
+        else:
+            response = self.client.service.CalendarsBySessionID(session_id)
+
+        calendars = {"session_id": session_id, "calendars": []}
+
+        for calendar in response:
+
+            current = calendar.attrib
+
+            calendar_obj = {
+                "calendar_id": current["Cal_ID"],
+                "body": current["Body"],
+                "type": current["Type"],
+                "calendar_date": current["Cal_Date"],
+                "number": current["Number"],
+                "committee_name": current["Committee_Name"],
+                "committee_id": current["Committee_ID"],
+                "calendar_name": current["Cal_Name"],
+                "calendar_Time": current["Cal_Time"],
+                "protest_date": current["Protest_Date"]
+                if "Protest_Date" in current
+                else None,
+                "url": current["URL"] if "URL" in current else None,
+                "bills": [],
+            }
+
+            for bill in calendar:
+
+                bill_attrib = bill.attrib
+
+                bill_obj = {
+                    "Bill_Number": bill_attrib["Bill_Number"],
+                    "Display_Order": bill_attrib["Display_Order"],
+                    "Reconsidered": bill_attrib["Reconsidered"],
+                }
+
+                calendar_obj["bills"].append(bill_obj)
+
+            calendars["calendars"].append(calendar_obj)
+
+        return calendars
 
     def committee_actions(self, body=None, committee_type=None) -> List:
         if body is not None and committee_type is not None:
@@ -264,7 +437,7 @@ class AzLegApiClient:
                     "vote": current["Vote"],
                 }
 
-                tran_obj['votes'].append(vote_obj)
+                tran_obj["votes"].append(vote_obj)
 
             votes["tran"].append(tran_obj)
 
