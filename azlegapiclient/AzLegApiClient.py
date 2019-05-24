@@ -191,9 +191,9 @@ class AzLegApiClient:
                 bill_attrib = bill.attrib
 
                 bill_obj = {
-                    "Bill_Number": bill_attrib["Bill_Number"],
-                    "Display_Order": bill_attrib["Display_Order"],
-                    "Reconsidered": bill_attrib["Reconsidered"],
+                    "bill_number": bill_attrib["Bill_Number"],
+                    "display_order": bill_attrib["Display_Order"],
+                    "reconsidered": bill_attrib["Reconsidered"],
                 }
 
                 calendar_obj["bills"].append(bill_obj)
@@ -229,9 +229,9 @@ class AzLegApiClient:
             bill_attrib = bill.attrib
 
             bill_obj = {
-                "Bill_Number": bill_attrib["Bill_Number"],
-                "Display_Order": bill_attrib["Display_Order"],
-                "Reconsidered": bill_attrib["Reconsidered"],
+                "bill_number": bill_attrib["Bill_Number"],
+                "display_order": bill_attrib["Display_Order"],
+                "reconsidered": bill_attrib["Reconsidered"],
             }
 
             calendar["bills"].append(bill_obj)
@@ -272,9 +272,9 @@ class AzLegApiClient:
                 bill_attrib = bill.attrib
 
                 bill_obj = {
-                    "Bill_Number": bill_attrib["Bill_Number"],
-                    "Display_Order": bill_attrib["Display_Order"],
-                    "Reconsidered": bill_attrib["Reconsidered"],
+                    "bill_number": bill_attrib["Bill_Number"],
+                    "display_order": bill_attrib["Display_Order"],
+                    "reconsidered": bill_attrib["Reconsidered"],
                 }
 
                 calendar_obj["bills"].append(bill_obj)
@@ -318,9 +318,9 @@ class AzLegApiClient:
                 bill_attrib = bill.attrib
 
                 bill_obj = {
-                    "Bill_Number": bill_attrib["Bill_Number"],
-                    "Display_Order": bill_attrib["Display_Order"],
-                    "Reconsidered": bill_attrib["Reconsidered"],
+                    "bill_number": bill_attrib["Bill_Number"],
+                    "display_order": bill_attrib["Display_Order"],
+                    "reconsidered": bill_attrib["Reconsidered"],
                 }
 
                 calendar_obj["bills"].append(bill_obj)
@@ -356,13 +356,80 @@ class AzLegApiClient:
 
         return actions
 
-    def committees_by_leg_body(self):
-        pass
+    def committees_by_leg_body(self, legislature_id: int, body: str):
 
-    def committees_by_leg_id(self):
-        pass
+        response = self.client.service.CommitteeByLegBody(legislature_id, body)
 
-    def committees_by_leg_type(self):
+        meta = response.attrib
+
+        committees = {"legislature_id": meta["legislature"], "committees": []}
+
+        for type in response:
+
+            committee_type = type.attrib["Committee_Type"]
+
+            for body in type:
+
+                committee_body = body.attrib["Body"]
+
+                for committee in body:
+
+                    committee_attrib = committee.attrib
+
+                    current = {
+                        "type": committee_type,
+                        "body": committee_body,
+                        "committee_id": committee_attrib["Committee_ID"],
+                        "committee_name": committee_attrib["Committee_Name"],
+                        "committee_short_name": committee_attrib[
+                            "Committee_Short_Name"
+                        ],
+                        "sub_committee": committee_attrib["Sub_Committee"],
+                    }
+
+                    committees["committees"].append(current)
+
+        return committees
+
+    # Returns two body tags
+    # Only get commitee data from body tags with children?
+
+    def committee_by_leg_id(self, legislature_id: int, committee_id: int):
+
+        response = self.client.service.CommitteeByLegID(legislature_id, committee_id)
+
+        meta = response.attrib
+
+        committees = {
+            "legislature_id": meta["legislature"]
+        }
+
+        for committee_type in response:
+
+            committee_type_str = committee_type.attrib["Committee_Type"]
+
+            for committee_body in committee_type:
+
+                committee_body_str = committee_body.attrib["Body"]
+
+                for committee in committee_body:
+
+                    committee_attrib = committee.attrib
+
+                    obj = {
+                    "type": committee_type_str,
+                    "body": committee_body_str,
+                    "committee_id": committee_attrib["Committee_ID"],
+                    "committee_name": committee_attrib["Committee_Name"],
+                    "committee_short_name": committee_attrib["Committee_Short_Name"],
+                    "sub_committee": committee_attrib["Sub_Committee"],
+                    }
+
+                    committees["committee"] = obj            
+
+        return committees
+
+    def committee_by_leg_type(self):
         pass
 
     def committees_by_leg_type_body(self):
@@ -499,6 +566,7 @@ class AzLegApiClient:
         return member
 
     # TODO Test This One
+    # TODO Does not work ... ?
 
     def member_committees(self, session_id: int, member_id: int) -> Dict:
 
