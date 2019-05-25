@@ -468,9 +468,7 @@ class AzLegApiClient:
 
     def committees_by_leg_type_body(self, legislature_id, body: str) -> Dict:
 
-        response = self.client.service.CommitteeByLegBody(
-            legislature_id, body
-        )
+        response = self.client.service.CommitteeByLegBody(legislature_id, body)
 
         meta = response.attrib
 
@@ -504,7 +502,7 @@ class AzLegApiClient:
         return committees
 
     def committees_by_leg(self, legislature_id: int) -> Dict:
-        
+
         response = self.client.service.CommitteeByLegislature(legislature_id)
 
         meta = response.attrib
@@ -539,19 +537,19 @@ class AzLegApiClient:
         return committees
 
     def committee_members(self, session_id: int, committee_id: int) -> Dict:
-        
+
         response = self.client.service.CommitteeMembers(session_id, committee_id)
 
-        current_body = response.find('BODY')
-        current_committee = current_body.find('COMMITTEE')
+        current_body = response.find("BODY")
+        current_committee = current_body.find("COMMITTEE")
 
-        response_committee_id = current_committee.get('Committee_ID')
+        response_committee_id = current_committee.get("Committee_ID")
 
         committee_members = {
             "committee_id": response_committee_id,
             "committee_type": current_committee.get("Committee_Type"),
             "committee_name": current_committee.get("Committee_Name"),
-            "committee_members":[]
+            "committee_members": [],
         }
 
         # Probably a better way of doing this
@@ -564,7 +562,7 @@ class AzLegApiClient:
                             "member_order": member.get("Member_Order"),
                             "member_id": member.get("Member_ID"),
                             "member_name": member.get("Member_Name"),
-                            "member_position": member.get("Member_Position")
+                            "member_position": member.get("Member_Position"),
                         }
 
                         committee_members["committee_members"].append(obj)
