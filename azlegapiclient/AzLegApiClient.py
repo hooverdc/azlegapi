@@ -799,31 +799,31 @@ class AzLegApiClient:
 
     def exec_nom_agencies_and_positions(self, include_disabled_agencies: int):
 
-        response = self.client.service.ExecNomAgenciesandPositions(include_disabled_agencies)
+        response = self.client.service.ExecNomAgenciesandPositions(
+            include_disabled_agencies
+        )
 
-        agencies = {
-            "agencies":[]
-        }
+        agencies = {"agencies": []}
 
         for agency in response:
-            
+
             agency_obj = {
-                "agency_id":agency.get("AgencyID"),
-                "agency_name":agency.get("AgencyName"),
-                "proper_name":agency.get("ProperName"),
-                "origin":agency.get("Origin"),
-                "term_length":agency.get("TermLength"),
-                "description":agency.get("Description"),
-                "disabled":agency.get("Disabled"),
-                "positions":[]
+                "agency_id": agency.get("AgencyID"),
+                "agency_name": agency.get("AgencyName"),
+                "proper_name": agency.get("ProperName"),
+                "origin": agency.get("Origin"),
+                "term_length": agency.get("TermLength"),
+                "description": agency.get("Description"),
+                "disabled": agency.get("Disabled"),
+                "positions": [],
             }
 
             for position in agency:
                 position_obj = {
-                    "position_id":position.get("PositionId"),
-                    "name":position.get("Name"),
-                    "display_order":position.get("DisplayOrder"),
-                    "disabled":position.get("Disabled")
+                    "position_id": position.get("PositionId"),
+                    "name": position.get("Name"),
+                    "display_order": position.get("DisplayOrder"),
+                    "disabled": position.get("Disabled"),
                 }
 
                 agency_obj["positions"].append(position_obj)
@@ -877,36 +877,306 @@ class AzLegApiClient:
 
         return votes
 
-    def floor_votes_by_bill_from_date(self):
-        pass
+    def floor_votes_by_bill_from_date(
+        self, session_id: int, bill_number: str, start_date: str
+    ):
 
-    def floor_votes_by_committee_id(self):
-        pass
+        response = self.client.service.FloorVotesByBillFromDate(
+            session_id, bill_number, start_date
+        )
 
-    def floor_votes_by_session_id(self):
-        pass
+        meta = response.attrib
 
-    def floor_votes_from_date(self):
-        pass
+        votes = {"session_id": meta["SessionID"], "tran": []}
 
-    def floor_votes_from_date_to_date(self):
-        pass
+        for tran in response:
 
-    def floor_votes_by_date(self):
-        pass
+            tran_meta = tran.attrib
 
-    def bill_positions_by_date(self):
-        pass
+            tran_obj = {
+                "tran_id": tran_meta["ID"],
+                "type": tran_meta["Type"],
+                "bill": tran_meta["Bill"],
+                "cmte_id": tran_meta["CmteID"],
+                "cmte_name": tran_meta["CmteName"],
+                "cmte_short_name": tran_meta["CmteShortName"],
+                "referral": tran_meta["Referral"],
+                "cow_referral": tran_meta["COW_Referral"],
+                "action": tran_meta["Action"],
+                "action_id": tran_meta["Action_ID"],
+                "action_date": tran_meta["ActionDate"],
+                "comments": tran_meta["Comments"],
+                "votes": [],
+            }
 
-    def bill_positions_by_session(self):
-        pass
+            for vote in tran:
 
-    def bill_positions_by_session_from_date(self):
-        pass
+                current = vote.attrib
+
+                vote_obj = {
+                    "member_id": current["MemID"],
+                    "member_name": current["MemName"],
+                    "display_order": current["DisplayOrder"],
+                    "vote": current["Vote"],
+                }
+
+                tran_obj["votes"].append(vote_obj)
+
+            votes["tran"].append(tran_obj)
+
+        return votes
+
+    def floor_votes_by_committee_id(self, session_id: int, committee_id: int):
+
+        response = self.client.service.FloorVotesByCommID(session_id, committee_id)
+
+        meta = response.attrib
+
+        votes = {"session_id": meta["SessionID"], "tran": []}
+
+        for tran in response:
+
+            tran_meta = tran.attrib
+
+            tran_obj = {
+                "tran_id": tran_meta["ID"],
+                "type": tran_meta["Type"],
+                "bill": tran_meta["Bill"],
+                "cmte_id": tran_meta["CmteID"],
+                "cmte_name": tran_meta["CmteName"],
+                "cmte_short_name": tran_meta["CmteShortName"],
+                "referral": tran_meta["Referral"],
+                "cow_referral": tran_meta["COW_Referral"],
+                "action": tran_meta["Action"],
+                "action_id": tran_meta["Action_ID"],
+                "action_date": tran_meta["ActionDate"],
+                "comments": tran_meta["Comments"],
+                "votes": [],
+            }
+
+            for vote in tran:
+
+                current = vote.attrib
+
+                vote_obj = {
+                    "member_id": current["MemID"],
+                    "member_name": current["MemName"],
+                    "display_order": current["DisplayOrder"],
+                    "vote": current["Vote"],
+                }
+
+                tran_obj["votes"].append(vote_obj)
+
+            votes["tran"].append(tran_obj)
+
+        return votes
+
+    def floor_votes_by_session_id(self, session_id: int):
+
+        response = self.client.service.FloorVotesBySessionID(session_id)
+
+        meta = response.attrib
+
+        votes = {"session_id": meta["SessionID"], "tran": []}
+
+        for tran in response:
+
+            tran_meta = tran.attrib
+
+            tran_obj = {
+                "tran_id": tran_meta["ID"],
+                "type": tran_meta["Type"],
+                "bill": tran_meta["Bill"],
+                "cmte_id": tran_meta["CmteID"],
+                "cmte_name": tran_meta["CmteName"],
+                "cmte_short_name": tran_meta["CmteShortName"],
+                "referral": tran_meta["Referral"],
+                "cow_referral": tran_meta["COW_Referral"],
+                "action": tran_meta["Action"],
+                "action_id": tran_meta["Action_ID"],
+                "action_date": tran_meta["ActionDate"],
+                "comments": tran_meta["Comments"],
+                "votes": [],
+            }
+
+            for vote in tran:
+
+                current = vote.attrib
+
+                vote_obj = {
+                    "member_id": current["MemID"],
+                    "member_name": current["MemName"],
+                    "display_order": current["DisplayOrder"],
+                    "vote": current["Vote"],
+                }
+
+                tran_obj["votes"].append(vote_obj)
+
+            votes["tran"].append(tran_obj)
+
+        return votes
+
+    def floor_votes_from_date(self, session_id: int, start_date: str):
+
+        response = self.client.service.FloorVotesFromDate(self, session_id, start_date)
+
+        meta = response.attrib
+
+        votes = {"session_id": meta["SessionID"], "tran": []}
+
+        for tran in response:
+
+            tran_meta = tran.attrib
+
+            tran_obj = {
+                "tran_id": tran_meta["ID"],
+                "type": tran_meta["Type"],
+                "bill": tran_meta["Bill"],
+                "cmte_id": tran_meta["CmteID"],
+                "cmte_name": tran_meta["CmteName"],
+                "cmte_short_name": tran_meta["CmteShortName"],
+                "referral": tran_meta["Referral"],
+                "cow_referral": tran_meta["COW_Referral"],
+                "action": tran_meta["Action"],
+                "action_id": tran_meta["Action_ID"],
+                "action_date": tran_meta["ActionDate"],
+                "comments": tran_meta["Comments"],
+                "votes": [],
+            }
+
+            for vote in tran:
+
+                current = vote.attrib
+
+                vote_obj = {
+                    "member_id": current["MemID"],
+                    "member_name": current["MemName"],
+                    "display_order": current["DisplayOrder"],
+                    "vote": current["Vote"],
+                }
+
+                tran_obj["votes"].append(vote_obj)
+
+            votes["tran"].append(tran_obj)
+
+        return votes
+
+    def floor_votes_from_date_to_date(
+        self, session_id: int, start_date: str, end_date: str
+    ):
+
+        response = self.client.service.FloorVotesFromDateToDate(
+            self, session_id, start_date, end_date
+        )
+
+        meta = response.attrib
+
+        votes = {"session_id": meta["SessionID"], "tran": []}
+
+        for tran in response:
+
+            tran_meta = tran.attrib
+
+            tran_obj = {
+                "tran_id": tran_meta["ID"],
+                "type": tran_meta["Type"],
+                "bill": tran_meta["Bill"],
+                "cmte_id": tran_meta["CmteID"],
+                "cmte_name": tran_meta["CmteName"],
+                "cmte_short_name": tran_meta["CmteShortName"],
+                "referral": tran_meta["Referral"],
+                "cow_referral": tran_meta["COW_Referral"],
+                "action": tran_meta["Action"],
+                "action_id": tran_meta["Action_ID"],
+                "action_date": tran_meta["ActionDate"],
+                "comments": tran_meta["Comments"],
+                "votes": [],
+            }
+
+            for vote in tran:
+
+                current = vote.attrib
+
+                vote_obj = {
+                    "member_id": current["MemID"],
+                    "member_name": current["MemName"],
+                    "display_order": current["DisplayOrder"],
+                    "vote": current["Vote"],
+                }
+
+                tran_obj["votes"].append(vote_obj)
+
+            votes["tran"].append(tran_obj)
+
+        return votes
+
+    def bill_positions_by_date(self, start_date: str, end_date: str) -> Dict:
+
+        response = self.client.service.ForAgainstNeutralBetweenDates(
+            start_date, end_date
+        )
+
+        positions = {"positions": []}
+
+        for position in response:
+            position_obj = {
+                "first_name": position.get("First_Name"),
+                "last_name": position.get("Last_name"),
+                "bill_number": position.get("BillNum"),
+                "representing": position.get("Representing"),
+                "opinion": position.get("Opinion"),
+                "position_date": position.get("PosDate"),
+            }
+
+            positions["positions"].append(position_obj)
+
+        return positions
+
+    def bill_positions_by_session(self, session_id: int) -> Dict:
+
+        response = self.client.service.ForAgainstNeutralBySessionID(session_id)
+
+        positions = {"positions": []}
+
+        for position in response:
+            position_obj = {
+                "first_name": position.get("First_Name"),
+                "last_name": position.get("Last_name"),
+                "bill_number": position.get("BillNum"),
+                "representing": position.get("Representing"),
+                "opinion": position.get("Opinion"),
+                "position_date": position.get("PosDate"),
+            }
+
+            positions["positions"].append(position_obj)
+
+        return positions
+
+    def bill_positions_by_session_from_date(self, session_id: int, start_date: str):
+
+        response = self.client.service.ForAgainstNeutralBySessionIDFromDate(
+            session_id, start_date
+        )
+
+        positions = {"positions": []}
+
+        for position in response:
+            position_obj = {
+                "first_name": position.get("First_Name"),
+                "last_name": position.get("Last_name"),
+                "bill_number": position.get("BillNum"),
+                "representing": position.get("Representing"),
+                "opinion": position.get("Opinion"),
+                "position_date": position.get("PosDate"),
+            }
+
+            positions["positions"].append(position_obj)
+
+        return positions
 
     def member_by_id(self, member_id: int, session_id: int):
 
-        response = self.client.service.MemberByID()
+        response = self.client.service.MemberByID(member_id, session_id)
 
         current = dict(response.attrib)
 
@@ -1078,8 +1348,70 @@ class AzLegApiClient:
     def standing_from_date_to_date(self, start_date, end_date):
         pass
 
-    def videos_by_date(self, date):
-        pass
+    def videos_by_date(self, date: str):
 
-    def videos_by_session(self, session_id):
-        pass
+        response = self.client.service.VideosByDate(date)
+
+        videos = {"videos": []}
+
+        for video in response:
+
+            video_obj = {
+                "VideoClipId": video.get("VideoClipId"),
+                "ClipName": video.get("ClipName"),
+                "Duration": video.get("Duration"),
+                "Date": video.get("Date"),
+                "ForeignId": video.get("ForeignId"),
+                "DownloadLink": video.get("DownloadLink"),
+                "SessionId": video.get("SessionId"),
+                "chapters": [],
+            }
+
+            for chapter in video:
+
+                chapter_obj = {
+                    "Clipname": chapter.get("Clipname"),
+                    "ForeignID": chapter.get("ForeignID"),
+                    "TimeStamp": chapter.get("TimeStamp"),
+                    "VideoClipIndexId": chapter.get("VideoClipIndexId"),
+                }
+
+                video_obj["chapters"].append(chapter_obj)
+
+            videos["videos"].append(video_obj)
+
+        return videos
+
+    def videos_by_session(self, session_id: int):
+
+        response = self.client.service.VideosBySession(session_id)
+
+        videos = {"videos": []}
+
+        for video in response:
+
+            video_obj = {
+                "VideoClipId": video.get("VideoClipId"),
+                "ClipName": video.get("ClipName"),
+                "Duration": video.get("Duration"),
+                "Date": video.get("Date"),
+                "ForeignId": video.get("ForeignId"),
+                "DownloadLink": video.get("DownloadLink"),
+                "SessionId": video.get("SessionId"),
+                "chapters": [],
+            }
+
+            for chapter in video:
+
+                chapter_obj = {
+                    "Clipname": chapter.get("Clipname"),
+                    "ForeignID": chapter.get("ForeignID"),
+                    "TimeStamp": chapter.get("TimeStamp"),
+                    "VideoClipIndexId": chapter.get("VideoClipIndexId"),
+                }
+
+                video_obj["chapters"].append(chapter_obj)
+
+            videos["videos"].append(video)
+
+        return videos
