@@ -569,29 +569,268 @@ class AzLegApiClient:
 
         return committee_members
 
-    def documents_by_bill_num(self):
-        pass
+    def documents_by_bill_num(self, session_id: int, bill_number: str):
 
-    def documents_by_bill_num_doc_type(self):
-        pass
+        response = self.client.service.DocumentsByBillNum(session_id, bill_number)
 
-    def documents_by_doc_type(self):
-        pass
+        documents = {"bill_number": bill_number, "documents": []}
 
-    def documents_from_date(self):
-        pass
+        for document in response:
+            obj = {
+                "item": document.get("Item"),
+                "transaction_type": document.get("Transaction_Type"),
+                "bill_number": document.get("Bill_Number"),
+                "document_type": document.get("Document_Type"),
+                "document_format": document.get("Document_Format"),
+                "description": document.get("Description"),
+                "url": document.get("URL"),
+                "transaction_date": document.get("Transaction_Date"),
+            }
 
-    def documents_from_date_to_date(self):
-        pass
+            documents["documents"].append(obj)
 
-    def exe_nom_current_position_holder(self):
-        pass
+        return documents
 
-    def exe_nom_by_id(self):
-        pass
+    def documents_by_bill_num_doc_type(
+        self, session_id: int, bill_number: str, doc_type: str
+    ):
 
-    def exec_nom_a_and_p(self):
-        pass
+        response = self.client.service.DocumentsByBillNumDocType(
+            session_id, bill_number, doc_type
+        )
+
+        documents = {"bill_number": bill_number, "documents": []}
+
+        for document in response:
+            obj = {
+                "item": document.get("Item"),
+                "transaction_type": document.get("Transaction_Type"),
+                "bill_number": document.get("Bill_Number"),
+                "document_type": document.get("Document_Type"),
+                "document_format": document.get("Document_Format"),
+                "description": document.get("Description"),
+                "url": document.get("URL"),
+                "transaction_date": document.get("Transaction_Date"),
+            }
+
+            documents["documents"].append(obj)
+
+        return documents
+
+    def documents_by_doc_type(self, session_id: int, doc_type: str) -> Dict:
+
+        response = self.client.service.DocumentsByDocType(session_id, doc_type)
+
+        documents = {"session_id": session_id, "documents": []}
+
+        for document in response:
+            obj = {
+                "item": document.get("Item"),
+                "transaction_type": document.get("Transaction_Type"),
+                "bill_number": document.get("Bill_Number"),
+                "document_type": document.get("Document_Type"),
+                "document_format": document.get("Document_Format"),
+                "description": document.get("Description"),
+                "url": document.get("URL"),
+                "transaction_date": document.get("Transaction_Date"),
+            }
+
+            documents["documents"].append(obj)
+
+        return documents
+
+    def documents_by_session_id(self, session_id: int):
+
+        response = self.client.service.DocumentsBySessionID(session_id)
+
+        documents = {"session_id": session_id, "documents": []}
+
+        for document in response:
+            obj = {
+                "item": document.get("Item"),
+                "transaction_type": document.get("Transaction_Type"),
+                "bill_number": document.get("Bill_Number"),
+                "document_type": document.get("Document_Type"),
+                "document_format": document.get("Document_Format"),
+                "description": document.get("Description"),
+                "url": document.get("URL"),
+                "transaction_date": document.get("Transaction_Date"),
+            }
+
+            documents["documents"].append(obj)
+
+        return documents
+
+    def documents_from_date(self, session_id: int, start_date: str):
+
+        response = self.client.service.DocumentsByBillNumFromDate(
+            session_id, start_date
+        )
+
+        documents = {"session_id": session_id, "documents": []}
+
+        for document in response:
+            obj = {
+                "item": document.get("Item"),
+                "transaction_type": document.get("Transaction_Type"),
+                "ill_number": document.get("Bill_Number"),
+                "document_type": document.get("Document_Type"),
+                "document_format": document.get("Document_Format"),
+                "description": document.get("Description"),
+                "url": document.get("URL"),
+                "transaction_date": document.get("Transaction_Date"),
+            }
+
+            documents["documents"].append(obj)
+
+        return documents
+
+    # TODO Borked
+
+    def documents_from_date_to_date(
+        self, session_id: int, start_date: str, end_date: str
+    ):
+
+        response = self.client.service.DocumentsFromDateToDate(
+            session_id, start_date, end_date
+        )
+
+        documents = {"session_id": session_id, "documents": []}
+
+        for document in response:
+            obj = {
+                "item": document.get("Item"),
+                "transaction_type": document.get("Transaction_Type"),
+                "bill_number": document.get("Bill_Number"),
+                "document_type": document.get("Document_Type"),
+                "document_format": document.get("Document_Format"),
+                "description": document.get("Description"),
+                "url": document.get("URL"),
+                "transaction_date": document.get("Transaction_Date"),
+            }
+
+            documents["documents"].append(obj)
+
+        return documents
+
+    def exe_nom_current_position_holder(
+        self, session_id: int, agency_id: int, position_id: int
+    ) -> Dict:
+
+        response = self.client.service.ExeNomCurrentPositionHolder(
+            session_id, agency_id, position_id
+        )
+
+        nominee_position = response.find("NOMINEEPOS")
+
+        nominee = {
+            "agency_id": nominee_position.get("AgencyId"),
+            "position_id": nominee_position.get("PositionId"),
+            "nominee_id": nominee_position.get("NomineeId"),
+            "first_name": nominee_position.get("FirstName"),
+            "middle_initial": nominee_position.get("MiddleInitial"),
+            "last_name": nominee_position.get("LastName"),
+            "title": nominee_position.get("Title"),
+            "party": nominee_position.get("Party"),
+            "nominee_position_id": nominee_position.get("NomineePositionId"),
+            "received_date": nominee_position.get("ReceivedDate"),
+            "confirmed_date": nominee_position.get("ConfirmedDate"),
+            "governor": nominee_position.get("Governor"),
+            "position_comment": nominee_position.get("PositionComment"),
+            "replacing": nominee_position.get("Replacing"),
+            "appointment_date": nominee_position.get("AppointmentDate"),
+            "expiration_date": nominee_position.get("ExpirationDate"),
+            "caucus_date": nominee_position.get("CaucusDate"),
+            "gov_notified_date": nominee_position.get("GovNotifiedDate"),
+            "withdrawn_from_consideration": nominee_position.get(
+                "WithdrawnFromConsideration"
+            ),
+            "comments": nominee_position.get("Comments"),
+            "reappoint": nominee_position.get("Reappoint"),
+            "no_longer_serving": nominee_position.get("NoLongerServing"),
+            "wo_conf": nominee_position.get("WOConf"),
+            "wd_date": nominee_position.get("WDDate"),
+        }
+
+        return nominee
+
+    def exe_nom_by_id(self, nominee_id: int):
+
+        response = self.client.service.ExeNomNomineeById(nominee_id)
+
+        nominee = response.find("NOMINEE")
+        nominee_position = nominee.find("NOMPOSITION")
+
+        obj = {
+            "nominee_id": nominee.get("NomineeId"),
+            "first_name": nominee.get("FirstName"),
+            "middle_initial": nominee.get("MiddleInitial"),
+            "last_name": nominee.get("LastName"),
+            "title": nominee.get("Title"),
+            "party": nominee.get("Party"),
+            "address_line_1": nominee.get("AddressLine1"),
+            "address_line_2": nominee.get("AddressLine2"),
+            "address_line_3": nominee.get("AddressLine3"),
+            "nominee_dosition_Id": nominee_position.get("NomineePositionId"),
+            "received_date": nominee_position.get("ReceivedDate"),
+            "confirmed_date": nominee_position.get("ConfirmedDate"),
+            "governor": nominee_position.get("Governor"),
+            "position_comment": nominee_position.get("PositionComment"),
+            "replacing": nominee_position.get("Replacing"),
+            "appointment_date": nominee_position.get("AppointmentDate"),
+            "expiration_date": nominee_position.get("ExpirationDate"),
+            "referred_date": nominee_position.get("ReferredDate"),
+            "report_date": nominee_position.get("ReportDate"),
+            "caucus_date": nominee_position.get("CaucusDate"),
+            "committee_Short_Name": nominee_position.get("CommitteeShortName"),
+            "gov_notified_date": nominee_position.get("GovNotifiedDate"),
+            "withdrawn_from_consideration": nominee_position.get(
+                "WithdrawnFromConsideration"
+            ),
+            "comments": nominee_position.get("Comments"),
+            "reappoint": nominee_position.get("Reappoint"),
+            "caucus_vote": nominee_position.get("CaucusVote"),
+            "beginning_date": nominee_position.get("BeginningDate"),
+            "no_longer_serving": nominee_position.get("NoLongerServing"),
+            "wd_date": nominee_position.get("WDDate"),
+        }
+
+        return obj
+
+    def exec_nom_agencies_and_positions(self, include_disabled_agencies: int):
+
+        response = self.client.service.ExecNomAgenciesandPositions(include_disabled_agencies)
+
+        agencies = {
+            "agencies":[]
+        }
+
+        for agency in response:
+            
+            agency_obj = {
+                "agency_id":agency.get("AgencyID"),
+                "agency_name":agency.get("AgencyName"),
+                "proper_name":agency.get("ProperName"),
+                "origin":agency.get("Origin"),
+                "term_length":agency.get("TermLength"),
+                "description":agency.get("Description"),
+                "disabled":agency.get("Disabled"),
+                "positions":[]
+            }
+
+            for position in agency:
+                position_obj = {
+                    "position_id":position.get("PositionId"),
+                    "name":position.get("Name"),
+                    "display_order":position.get("DisplayOrder"),
+                    "disabled":position.get("Disabled")
+                }
+
+                agency_obj["positions"].append(position_obj)
+
+            agencies["agencies"].append(agency_obj)
+
+        return agencies
 
     def floor_votes_by_bill(self, session_id: int, bill_number: str) -> Dict:
 
