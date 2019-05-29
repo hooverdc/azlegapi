@@ -1320,8 +1320,42 @@ class AzLegApiClient:
 
         return data
 
-    def standing_by_bill_num(self):
-        pass
+    def standing_by_bill_num(self, session_id: int, bill_number: str) -> Dict:
+        
+        response = self.client.service.StandingByBillNum(session_id, bill_number)
+
+        standings = {
+            "bill_number": bill_number,
+            "standings":[]
+        }
+
+        for standing in response:
+
+            standing_obj = {
+                "session_id":standing.get("Session_ID"),
+                "bill_number":standing.get("Bill_Number"),
+                "committee_id":standing.get("Committee_ID"),
+                "committee_name":standing.get("Committee_Name"),
+                "committee_short_name":standing.get("Committee_Short_Name"),
+                "referral_number":standing.get("Referral_Number"),
+                "display_order":standing.get("Display_Order"),
+                "assigned_date":standing.get("Assigned_Date"),
+                "vote_recon":standing.get("Vote_Recon"),
+                "action_id":standing.get("Action_ID"),
+                "action":standing.get("Action"),
+                "ayes":standing.get("Ayes"),
+                "nays":standing.get("Nays"),
+                "excused":standing.get("Excused"),
+                "not_voting":standing.get("Not_Voting"),
+                "present":standing.get("Present"),
+                "absent":standing.get("Absent"),
+                "report_date":standing.get("Report_Date"),
+                "vacant":standing.get("Vacant")
+            }
+
+            standings["standings"].append(standing_obj)
+
+        return standings
 
     # TODO DATE
 
@@ -1334,8 +1368,47 @@ class AzLegApiClient:
     def standing_from_date(self):
         pass
 
-    def standing_vote_for_bill(self, session_id, bill_num):
-        pass
+    def standing_vote_for_bill(self, session_id: int, bill_number: str) -> Dict:
+        
+        response = self.client.service.StandingVoteForBillNum(session_id, bill_number)
+
+        standing_votes = {
+            "session_id": response.get("SessionID"),
+            "bill_number": bill_number,
+            "transactions":[]
+        }
+
+        for transaction in response:
+
+            transaction_obj = {
+                "id":transaction.get("ID"),
+                "type":transaction.get("Type"),
+                "bill_number":transaction.get("Bill"),
+                "committee_id":transaction.get("CmteID"),
+                "committee_short_name":transaction.get("CmteShortName"),
+                "committee_name":transaction.get("CmteName"),
+                "referral":transaction.get("Referral"),
+                "action":transaction.get("Action"),
+                "action_id":transaction.get("Action_ID"),
+                "action_date":transaction.get("ActionDate"),
+                "votes":[]
+            }
+
+            for vote in transaction:
+
+                vote_obj = {
+                    "member_id":vote.get("MemID"),
+                    "member_name":vote.get("MemName"),
+                    "display_order":vote.get("DisplayOrder"),
+                    "vote":vote.get("Vote")
+                }
+
+                transaction_obj["votes"].append(vote_obj)
+
+            standing_votes["transactions"].append(transaction_obj)
+
+        return standing_votes
+
 
     # TODO Date
 
